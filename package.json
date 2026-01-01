@@ -1,0 +1,17 @@
+{
+  "name": "promptlab",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install": "pnpm run install:all",
+    "install:all": "pnpm --dir frontend install && pnpm --dir backend install",
+    "dev": "pnpm run dev:all",
+    "dev:all": "concurrently \"pnpm --dir backend start:dev\" \"pnpm --dir frontend dev\"",
+    "dev:frontend": "pnpm --dir frontend dev",
+    "dev:backend": "pnpm --dir backend start:dev",
+    "build": "pnpm --dir frontend build && pnpm --dir backend build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
