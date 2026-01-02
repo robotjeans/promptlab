@@ -1,14 +1,14 @@
 import { Navigate } from "react-router";
-import { useAuth } from "../hooks/useAuth";
-import { LoadingSpinner } from "./LoadingSpinner";
+//import { useAuth } from "../hooks/useAuth";
+//import { LoadingSpinner } from "./LoadingSpinner";
+import { authApi } from "../lib/api";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, isLoading } = useAuth();
-
+  /*
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -16,8 +16,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       </div>
     );
   }
-
-  if (!user) {
+*/
+  if (!authApi.isAuthenticated()) {
     return <Navigate to="/login" replace />;
   }
 

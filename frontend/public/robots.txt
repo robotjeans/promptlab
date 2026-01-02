@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Block sensitive areas
+Disallow: /dashboard/
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://promptlab.com/sitemap.xml

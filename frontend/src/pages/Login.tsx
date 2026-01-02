@@ -1,11 +1,15 @@
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
-import { useEffect } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useEffect, useState } from "react";
 import { Header } from "../components/layout/Header";
 import { FormInput } from "../components/form/FormInput";
 import { FormButton } from "../components/form/FormButton";
 import { Checkbox } from "../components/form/Checkbox";
+import { Footer } from "../components/layout";
+import { authApi, type ApiError } from "../lib/api";
+import type { AxiosError } from "axios";
+import { loginSchema } from "../lib/validations/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface LoginFormInputs {
   emailOrUsername: string;
@@ -13,52 +17,59 @@ interface LoginFormInputs {
 }
 
 export default function Login() {
+  const [loading, setLoading] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormInputs>({
-    mode: "onBlur",
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       emailOrUsername: "",
       password: "",
     },
+    mode: "onSubmit",
   });
 
-  const { user, login } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
+    if (authApi.isAuthenticated()) {
       navigate("/dashboard", { replace: true });
     }
-  }, [user, navigate]);
+  }, [navigate]);
 
   const onSubmit = async (data: LoginFormInputs) => {
+    setLoading(true);
+    setServerError(null);
+
+    console.log(data);
+
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Invalid credentials");
-      }
-
-      login(result.access_token);
-      navigate("/");
+      const response = await authApi.login(data);
+      console.log("Logged in:", response.user);
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Login failed");
+      const error = err as AxiosError<ApiError>;
+
+      if (error.response?.status === 429) {
+        setServerError("Too many login attempts. Please try again later.");
+      } else {
+        setServerError(
+          error.response?.data?.message || "Login failed. Please try again."
+        );
+        console.log(serverError);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Header showAuthButtons={false} />
-
       <main className="grow flex items-center px-4 py-8 sm:py-12">
         <div className="w-full max-w-md mx-auto">
           <div className="text-center mb-8">
@@ -73,33 +84,22 @@ export default function Login() {
           <div className="bg-white rounded-xl p-6 sm:p-8 border border-[rgb(238,243,251)] shadow-sm">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <FormInput
+                name="emailOrUsername"
                 label="Email or Username"
-                id="emailOrUsername"
                 type="text"
-                registration={register("emailOrUsername", {
-                  required: "Email or username is required",
-                })}
+                control={control}
                 error={errors.emailOrUsername?.message}
                 placeholder="Enter your email or username"
-                containerClassName="space-y-1"
               />
 
               <FormInput
+                name="password"
                 label="Password"
-                id="password"
                 type="password"
-                registration={register("password", {
-                  required: "Password is required",
-                  minLength: {
-                    value: 8,
-                    message: "Password must be at least 8 characters",
-                  },
-                })}
+                control={control}
                 error={errors.password?.message}
                 placeholder="Enter your password"
-                containerClassName="space-y-1"
               />
-
               <div className="flex items-center justify-between">
                 <Checkbox
                   id="remember-me"
@@ -113,7 +113,7 @@ export default function Login() {
                   Forgot password?
                 </a>
               </div>
-              <FormButton loading={isSubmitting}>Sign In</FormButton>
+              <FormButton loading={loading || isSubmitting}>Sign In</FormButton>
             </form>
           </div>
 
@@ -125,13 +125,7 @@ export default function Login() {
         </div>
       </main>
 
-      <footer className="border-t border-[rgb(238,243,251)] mt-auto">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-          <p className="text-center text-sm text-[rgb(107,114,128)]">
-            © 2026 PromptLab. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

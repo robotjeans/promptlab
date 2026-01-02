@@ -1,26 +1,22 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
-import { useAuth } from "../hooks/useAuth";
 import { Header } from "../components/layout/Header";
 import { LockIcon, ShieldIcon } from "../components/icons";
+import { Footer } from "../components/layout";
+import { authApi } from "../lib/api";
 
 export default function Home() {
-  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user && !isLoading) {
+    if (authApi.isAuthenticated()) {
       navigate("/dashboard", { replace: true });
     }
-  }, [user, isLoading, navigate]);
+  }, [navigate]);
 
   const handleGetStarted = () => {
     navigate("/login");
   };
-
-  if (isLoading) {
-    return null;
-  }
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -64,13 +60,7 @@ export default function Home() {
         </div>
       </div>
 
-      <footer className="border-t border-[rgb(238,243,251)] mt-auto">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-          <p className="text-center text-sm text-[rgb(107,114,128)]">
-            © 2026 PromptLab. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router";
-import { useAuth } from "../../hooks/useAuth";
+import { authApi } from "../../lib/api";
 
 interface HeaderProps {
   showAuthButtons?: boolean;
@@ -13,7 +13,6 @@ export const Header = ({
   rightContent,
   className = "",
 }: HeaderProps) => {
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = () => {
@@ -21,14 +20,14 @@ export const Header = ({
   };
 
   const handleLogout = () => {
-    logout();
+    authApi.logout();
     navigate("/login");
   };
 
   const renderAuthButtons = () => {
     if (!showAuthButtons) return null;
 
-    if (user) {
+    if (authApi.isAuthenticated()) {
       return (
         <button
           onClick={handleLogout}
