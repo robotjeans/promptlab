@@ -10,11 +10,13 @@ import {
   Logger,
   PayloadTooLargeException,
   UnsupportedMediaTypeException,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RagService } from './rag.service';
-
-// Define the file type interface directly
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import type { AuthenticatedRequest } from '../auth/types';
 interface UploadedFileType {
   fieldname: string;
   originalname: string;
@@ -32,6 +34,7 @@ export class RagController {
 
   constructor(private ragService: RagService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   @UseInterceptors(
     FileInterceptor('document', {
@@ -54,12 +57,9 @@ export class RagController {
   async handleQuery(
     @UploadedFile() file: UploadedFileType,
     @Body('question') question: string,
-    @Headers('x-user-id') userId: string,
+    @Request() req: AuthenticatedRequest,
   ) {
-    // Validate required fields
-    if (!userId) {
-      throw new BadRequestException('X-User-ID header is required');
-    }
+    const userId = req.user.id;
     if (!question?.trim()) {
       throw new BadRequestException('Question is required and cannot be empty');
     }
@@ -108,14 +108,13 @@ export class RagController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete('cleanup')
   async cleanupDocuments(
-    @Headers('x-user-id') userId: string,
+    @Request() req: AuthenticatedRequest,
     @Body('olderThanDays') olderThanDays?: number,
   ) {
-    if (!userId) {
-      throw new BadRequestException('X-User-ID header is required');
-    }
+    const userId = req.user.id;
 
     const days = olderThanDays && olderThanDays > 0 ? olderThanDays : 30;
 

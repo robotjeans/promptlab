@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common';
-import { HealthController } from './health/health.controller';
-import { HealthService } from './health/health.service';
 import { ConfigModule } from '@nestjs/config';
-import { AppService } from './app.service';
-import { RagService } from './rag/rag.service';
-import { AppController } from './app.controller';
-import { RagController } from './rag/rag.controller';
+import { DatabaseModule } from './database/database.module';
+import { AuthModule } from './auth/auth.module';
+import { HealthController } from './health/health.controller';
+import { RagModule } from './rag/rag.module';
 
 @Module({
   imports: [
@@ -13,8 +11,10 @@ import { RagController } from './rag/rag.controller';
       envFilePath: '.env',
       isGlobal: true,
     }),
+    DatabaseModule,
+    AuthModule,
+    RagModule,
   ],
-  controllers: [AppController, HealthController, RagController],
-  providers: [AppService, HealthService, RagService],
+  controllers: [HealthController],
 })
 export class AppModule {}

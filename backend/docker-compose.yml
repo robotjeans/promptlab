@@ -2,15 +2,21 @@ version: '3.8'
 
 services:
   backend:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - '3000:3000'
     environment:
       - NODE_ENV=production
       - CHROMA_URL=http://chroma:8000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=7d
     depends_on:
-      - chroma
+      chroma:
+        condition: service_started
     networks:
       - app-network
 
@@ -25,6 +31,11 @@ services:
       - ANONYMIZED_TELEMETRY=FALSE
     networks:
       - app-network
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/api/v1/heartbeat']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   app-network:
