@@ -1,7 +1,7 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [
@@ -10,6 +10,11 @@ export default defineConfig({
     }),
     react(),
   ],
+  test: {
+    environment: "jsdom",
+    setupFiles: ["./setup-test.ts"],
+    globals: true,
+  },
   server: {
     port: 5173,
     proxy: {

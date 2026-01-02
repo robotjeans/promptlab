@@ -37,9 +37,15 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
 
     return (
       <div className="space-y-1">
-        <label className="text-sm font-medium text-gray-500">{label}</label>
+        <label
+          htmlFor={registration.name}
+          className="text-sm font-medium text-gray-500"
+        >
+          {label}
+        </label>
         <div className="relative">
           <input
+            id={registration.name}
             {...registration}
             {...props}
             ref={ref}
