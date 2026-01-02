@@ -6,6 +6,7 @@ export interface AuthUser {
 
 export type AuthContextType = {
   user: AuthUser | null;
+  isLoading: boolean;
   login: (token: string) => void;
   logout: () => void;
 };

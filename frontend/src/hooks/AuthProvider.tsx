@@ -1,17 +1,35 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { AuthUser } from "../types/auth";
 import { decodeToken } from "../lib/auth";
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "../context";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(() => {
-    const token = localStorage.getItem("token");
-    return token ? decodeToken(token) : null;
-  });
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const initializeAuth = () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        const decodedUser = decodeToken(token);
+        if (decodedUser) {
+          setUser(decodedUser);
+        } else {
+          localStorage.removeItem("token");
+        }
+      }
+      setIsLoading(false);
+    };
+
+    initializeAuth();
+  }, []);
 
   const login = (token: string) => {
     localStorage.setItem("token", token);
-    setUser(decodeToken(token));
+    const decodedUser = decodeToken(token);
+    if (decodedUser) {
+      setUser(decodedUser);
+    }
   };
 
   const logout = () => {
@@ -20,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
