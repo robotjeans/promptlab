@@ -17,6 +17,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { RagService } from './rag.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import type { AuthenticatedRequest } from '../auth/types';
+import { Throttle } from '@nestjs/throttler';
 interface UploadedFileType {
   fieldname: string;
   originalname: string;
@@ -35,6 +36,7 @@ export class RagController {
   constructor(private ragService: RagService) {}
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ medium: { limit: 10, ttl: 60000 } })
   @Post()
   @UseInterceptors(
     FileInterceptor('document', {

@@ -14,12 +14,14 @@ import { Public } from './public.decorator';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import type { AuthenticatedRequest } from './types';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Public()
+  @Throttle({ short: { limit: 5, ttl: 60000 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto) {
