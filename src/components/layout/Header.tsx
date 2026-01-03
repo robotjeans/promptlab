@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { authApi } from "../../lib/api";
+import { PromptLabLogo } from "../PromptLabLogo";
 
 interface HeaderProps {
   showAuthButtons?: boolean;
@@ -53,9 +54,7 @@ export const Header = ({
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <span className="text-lg font-semibold text-[rgb(0,0,0)]">
-              PromptLab
-            </span>
+            <PromptLabLogo />
           </div>
           {rightContent ? rightContent : renderAuthButtons()}
         </div>
